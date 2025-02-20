@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import { envs } from '../../config';
 
@@ -7,8 +8,6 @@ export class GithubSha256Middleware {
    static async verifyGithubSignature(req: Request, res: Response, next: NextFunction): Promise<any> {
       // Token de verificación
       const xHubSignature = `${req.headers['x-hub-signature-256']}`;
-      console.log(req.headers, 'headers');
-      console.log(req.header, 'header');
 
       const body = JSON.stringify(req.body);
       const secret = envs.SECRET_TOKEN;
@@ -27,28 +26,28 @@ export class GithubSha256Middleware {
 
    private static async verifySignature(secret: string, header: string, payload: string) {
       try {
-         let parts = header.split('=');
+         let parts = header.split("=");
          let sigHex = parts[1];
 
-         let algorithm = { name: 'HMAC', hash: { name: 'SHA-256' } };
+         let algorithm = { name: "HMAC", hash: { name: 'SHA-256' } };
 
-         let keyBytes = GithubSha256Middleware.encoder.encode(secret);
+         let keyBytes = this.encoder.encode(secret);
          let extractable = false;
          let key = await crypto.subtle.importKey(
-            'raw',
+            "raw",
             keyBytes,
             algorithm,
             extractable,
-            ['sign', 'verify']
+            ["sign", "verify"],
          );
 
-         let sigBytes = GithubSha256Middleware.hexToBytes(sigHex);
-         let dataBytes = GithubSha256Middleware.encoder.encode(payload);
+         let sigBytes = this.hexToBytes(sigHex);
+         let dataBytes = this.encoder.encode(payload);
          let equal = await crypto.subtle.verify(
             algorithm.name,
             key,
             sigBytes,
-            dataBytes
+            dataBytes,
          );
 
          return equal;
