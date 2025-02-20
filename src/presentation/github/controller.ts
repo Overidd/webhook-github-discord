@@ -24,7 +24,7 @@ export class GithubController {
       const githubEvent = req.header('x-github-event') ?? 'unknown'
       const payload = req.body;
       console.log(req.header('x-github-event'));
-      console.log(payload);
+      console.log(JSON.stringify(payload));
       const message = this.switchEvent(githubEvent, payload);
 
       this.discordService.notify(message)
